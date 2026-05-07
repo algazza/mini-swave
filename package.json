@@ -21,8 +21,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
     "@tailwindcss/vite": "^4.2.4",
+    "@tanstack/svelte-query": "^6.1.28",
     "axios": "^1.15.2",
     "svelte-spa-router": "^5.1.0",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "zod": "^4.4.3"
   }
 }
