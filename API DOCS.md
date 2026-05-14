@@ -13,12 +13,14 @@ GET [domain]/api/product
 	    {
 			    "id": 1,
 			    "name": "batman charm",
+          "product_image": "image.png",
 			    "stock": 5,
 			    "price": 5000,
 			},
 			{
 					"id": 2,
 			    "name": "spiderman charm",
+          "product_image": "image.png",
 			    "stock": 2,
 			    "price": 5000,
 			}
@@ -35,6 +37,7 @@ POST [domain]/api/product
 ```json
 {
     "name": "batman charm",
+    "product_image": "image.png",
     "stock": 5,
     "price": 5000,
 }
@@ -58,6 +61,7 @@ PUT [domain]/api/product/[id]
 ```json
 {
     "name": "batman charm",
+    "product_image": "image.png",
     "stock": 5,
     "price": 5000,
 }

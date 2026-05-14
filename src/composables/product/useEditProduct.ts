@@ -27,7 +27,7 @@ export const useEditProduct = () => {
           const fileName = `${Date.now()}.${fileExt}`;
 
           const { error: uploadError } = await supabase.storage
-            .from("product-image")
+            .from("products")
             .upload(fileName, image);
 
           if (uploadError) {
@@ -35,7 +35,7 @@ export const useEditProduct = () => {
           }
 
           const { data: publicUrlData } = supabase.storage
-            .from("product-image")
+            .from("products")
             .getPublicUrl(fileName);
 
           imageUrl = publicUrlData.publicUrl;
@@ -45,7 +45,7 @@ export const useEditProduct = () => {
 
             if (oldFileName) {
               await supabase.storage
-                .from("product-image")
+                .from("products")
                 .remove([oldFileName]);
             }
           }

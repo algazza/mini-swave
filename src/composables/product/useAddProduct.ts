@@ -23,7 +23,9 @@ export const useAddProduct = () => {
 
         const { error: uploadError } = await supabase.storage
           .from("products")
-          .upload(fileName, image);
+          .upload(fileName, image, {
+            contentType: "image/*",
+          });
 
         if (uploadError) {
           throw new Error(uploadError.message);
