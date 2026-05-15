@@ -5,7 +5,7 @@ export const AddCheckoutSchema = z.object({
   name: z.string(),
   phone: z.string(),
   disc_code: z.string().optional(),
-  payment_method: z.enum(["cash", "cashless"]),
+  payment_method: z.enum(["cash", "QRIS"]),
   upload_recipt: z.string().optional(),
   product_checkout: z.array(
     z.object({
@@ -32,7 +32,7 @@ export const GetDetailCheckout = z.object({
   name: z.string(),
   phone: z.string(),
   disc_code: z.string().optional(),
-  payment_method: z.enum(["cash", "cashless"]),
+  payment_method: z.enum(["cash", "QRIS"]),
   upload_recipt: z.string().optional(),
   total_price: z.number(),
   total_product: z.number(),

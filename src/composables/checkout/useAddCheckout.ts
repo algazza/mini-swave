@@ -26,7 +26,7 @@ export const useAddCheckout = () => {
           const fileName = `receipt-${Date.now()}.${fileExt}`;
 
           const { error: uploadError } = await supabase.storage
-            .from("checkout-receipt")
+            .from("receipt_image")
             .upload(fileName, receipt);
 
           if (uploadError) {
@@ -34,7 +34,7 @@ export const useAddCheckout = () => {
           }
 
           const { data: publicUrlData } = supabase.storage
-            .from("checkout-receipt")
+            .from("receipt_image")
             .getPublicUrl(fileName);
 
           receiptUrl = publicUrlData.publicUrl;

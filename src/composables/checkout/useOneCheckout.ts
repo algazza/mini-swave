@@ -12,7 +12,8 @@ export const useOneCheckout = (order: string) => {
         const res = await api.post("/get_checkout_detail", {
           p_order_id: order,
         });
-        return res.data.data as GetDetailCheckoutType;
+        const data = res.data.data || res.data;
+        return data as GetDetailCheckoutType;
       } catch (err) {
         const error = err as AxiosError<ErrorResponse>;
         throw new Error(

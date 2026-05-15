@@ -1,5 +1,20 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
+  import { onMount } from 'svelte';
+  import { push } from 'svelte-spa-router';
+
+  const STORAGE_KEY = 'swave_admin_auth';
+
+  onMount(() => {
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      push('/admin/login');
+    }
+  });
+
+  function signOut() {
+    localStorage.removeItem(STORAGE_KEY);
+    push('/admin/login');
+  }
 
   // Products
   import { useProduct } from '../composables/product/useProduct';
@@ -15,10 +30,15 @@
   import DiscountDeleteModal from '../components/admin/discount/DiscountDeleteModal.svelte';
   import type { DiscountType } from '../types/discount';
 
+  // Checkouts
+  import { useCheckout } from '../composables/checkout/useCheckout';
+  import CheckoutList from '../components/admin/checkout/CheckoutList.svelte';
+  import CheckoutDetailModal from '../components/admin/checkout/CheckoutDetailModal.svelte';
+
   import Button from '../components/ui/Button.svelte';
 
   // ─── Sidebar state ─────────────────────────────────────────────────────────
-  type Section = 'products' | 'discounts';
+  type Section = 'products' | 'discounts' | 'checkouts';
   let activeSection: Section = $state('products');
   let sidebarOpen = $state(true);
 
@@ -32,6 +52,11 @@
       id: 'discounts',
       label: 'Discounts',
       icon: `<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>`,
+    },
+    {
+      id: 'checkouts',
+      label: 'Checkouts',
+      icon: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>`,
     },
   ];
 
@@ -55,6 +80,14 @@
   function openEditDiscount(d: DiscountType) { selectedDiscount = d; isDiscountModalOpen = true; }
   function openDeleteDiscount(d: DiscountType) { selectedDiscount = d; isDiscountDeleteOpen = true; }
 
+  // ─── Checkouts ──────────────────────────────────────────────────────────────
+  const checkoutQuery = useCheckout();
+  let isCheckoutDetailOpen = $state(false);
+  let selectedOrderId: string | null = $state(null);
+
+  function openCheckoutDetail(orderId: string) { selectedOrderId = orderId; isCheckoutDetailOpen = true; }
+  function closeCheckoutDetail() { isCheckoutDetailOpen = false; selectedOrderId = null; }
+
   // ─── Section meta ──────────────────────────────────────────────────────────
   const sectionMeta: Record<Section, { title: string; description: string }> = {
     products: {
@@ -64,6 +97,10 @@
     discounts: {
       title: 'Discounts',
       description: 'Create and manage discount codes that customers can apply at checkout.',
+    },
+    checkouts: {
+      title: 'Checkouts',
+      description: 'Review and approve customer orders.',
     },
   };
 </script>
@@ -125,8 +162,9 @@
       {/each}
     </nav>
 
-    <!-- Collapse toggle -->
-    <div class="px-3 py-4 border-t border-slate-700/60">
+    <!-- Sidebar footer: collapse + sign out -->
+    <div class="px-3 py-4 border-t border-slate-700/60 space-y-1">
+      <!-- Collapse toggle -->
       <button
         onclick={() => (sidebarOpen = !sidebarOpen)}
         class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-150 text-sm font-medium"
@@ -149,6 +187,25 @@
         {#if sidebarOpen}
           <span transition:slide={{ axis: 'x', duration: 200 }} class="whitespace-nowrap">
             Collapse
+          </span>
+        {/if}
+      </button>
+
+      <!-- Sign out -->
+      <button
+        onclick={signOut}
+        id="admin-signout-btn"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-950/40 transition-all duration-150 text-sm font-medium"
+        title={sidebarOpen ? 'Sign out' : 'Sign out'}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        {#if sidebarOpen}
+          <span transition:slide={{ axis: 'x', duration: 200 }} class="whitespace-nowrap">
+            Sign Out
           </span>
         {/if}
       </button>
@@ -182,6 +239,17 @@
           </svg>
           Add Discount
         </Button>
+      {:else if activeSection === 'checkouts'}
+        <button
+          onclick={() => checkoutQuery.refetch()}
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium hover:bg-slate-200 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          Refresh
+        </button>
       {/if}
     </header>
 
@@ -241,6 +309,33 @@
         {:else if discountQuery.data}
           <DiscountList discounts={discountQuery.data} onEdit={openEditDiscount} onDelete={openDeleteDiscount} />
         {/if}
+
+      <!-- ── CHECKOUTS section ── -->
+      {:else if activeSection === 'checkouts'}
+        {#if checkoutQuery.isLoading}
+          <div class="flex flex-col justify-center items-center py-24">
+            <svg class="animate-spin h-8 w-8 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-slate-500 text-sm">Loading orders…</p>
+          </div>
+        {:else if checkoutQuery.isError}
+          <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center max-w-md mx-auto mt-8">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h3 class="text-sm font-semibold text-red-800 mb-1">Error loading orders</h3>
+            <p class="text-sm text-red-600 mb-4">{checkoutQuery.error?.message}</p>
+            <Button variant="secondary" onclick={() => checkoutQuery.refetch()}>Try again</Button>
+          </div>
+        {:else if checkoutQuery.data}
+          <CheckoutList checkouts={checkoutQuery.data} onView={openCheckoutDetail} />
+        {/if}
       {/if}
     </main>
   </div>
@@ -271,3 +366,12 @@
   discount={selectedDiscount}
   onclose={() => (isDiscountDeleteOpen = false)}
 />
+
+<!-- Checkout detail modal -->
+{#if isCheckoutDetailOpen && selectedOrderId}
+  <CheckoutDetailModal
+    isOpen={isCheckoutDetailOpen}
+    orderId={selectedOrderId}
+    onclose={closeCheckoutDetail}
+  />
+{/if}

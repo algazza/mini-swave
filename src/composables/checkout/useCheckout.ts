@@ -10,7 +10,8 @@ export const useCheckout = () => {
     queryFn: async () => {
       try {
         const res = await api.get("/get_all_checkout");
-        return res.data.data as GetAllCheckoutType[];
+        const data = res.data.data || res.data;
+        return (Array.isArray(data) ? data : []) as GetAllCheckoutType[];
       } catch (err) {
         const error = err as AxiosError<ErrorResponse>;
         throw new Error(
