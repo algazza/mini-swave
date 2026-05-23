@@ -16,7 +16,7 @@
   let name        = $state('');
   let phone       = $state('');
   let discCode    = $state('');
-  let paymentMethod = $state<'cash' | 'cashless'>('cash');
+  let paymentMethod = $state<'cash' | 'QRIS'>('cash');
   let receiptFile: File | null = $state(null);
   let receiptPreview: string | null = $state(null);
   let isDragging  = $state(false);
@@ -24,7 +24,7 @@
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   let subtotal  = $derived(slots.reduce((sum, s) => sum + s.product.price, 0));
-  let isQris    = $derived(paymentMethod === 'cashless');
+  let isQris    = $derived(paymentMethod === 'QRIS');
   let isPending = $derived(addCheckoutMutation.isPending);
   let canSubmit = $derived(slots.length > 0 && !isPending);
 
@@ -241,9 +241,9 @@
         <button
           type="button"
           id="payment-qris"
-          onclick={() => paymentMethod = 'cashless'}
+          onclick={() => paymentMethod = 'QRIS'}
           class="relative flex flex-col items-center gap-1.5 px-3 py-3.5 rounded-lg border-2 text-sm font-medium transition-all duration-200
-            {paymentMethod === 'cashless'
+            {paymentMethod === 'QRIS'
               ? 'border-black bg-gray-100 text-black'
               : 'border-black/10 text-gray-600 hover:border-black/20 bg-white hover:bg-gray-50'}"
         >
@@ -254,7 +254,7 @@
             <rect x="3" y="14" width="7" height="7" rx="1"></rect>
           </svg>
           <span class="text-xs font-semibold">QRIS</span>
-          {#if paymentMethod === 'cashless'}
+          {#if paymentMethod === 'QRIS'}
             <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-black"></span>
           {/if}
         </button>
