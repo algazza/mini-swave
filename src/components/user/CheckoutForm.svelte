@@ -98,7 +98,7 @@
         receipt:         isQris ? receiptFile : null,
         product_checkout: buildProductCheckout(),
       });
-      onSuccess(res?.data?.order_id ?? '');
+      onSuccess(res?.order_id ?? '');
     } catch (err) {
       formError = (err as Error).message || 'Failed to place order. Please try again.';
     }
