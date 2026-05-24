@@ -2,9 +2,11 @@ import z from "zod";
 import { ProductSchema } from "./product";
 
 export const AddCheckoutSchema = z.object({
-  name: z.string(),
-  phone: z.string(),
-  disc_code: z.string().optional(),
+  name: z.string()
+    .min(1, "Name is required")
+    .max(100, "Name must be 100 characters or less"),
+  phone: z.string()
+    .regex(/^\+62\d{8,12}$/, "Phone must start with +62 and contain 8-12 digits (11-15 characters total)"),
   payment_method: z.enum(["cash", "QRIS"]),
   upload_recipt: z.string().optional(),
   product_checkout: z.array(
@@ -31,7 +33,6 @@ export const GetDetailCheckout = z.object({
   order_id: z.string(),
   name: z.string(),
   phone: z.string(),
-  disc_code: z.string().optional(),
   payment_method: z.enum(["cash", "QRIS"]),
   upload_recipt: z.string().optional(),
   total_price: z.number(),

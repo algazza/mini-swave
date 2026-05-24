@@ -15,7 +15,6 @@
   // ── Form state ──────────────────────────────────────────────────────────────
   let name        = $state('');
   let phone       = $state('');
-  let discCode    = $state('');
   let paymentMethod = $state<'cash' | 'QRIS'>('cash');
   let receiptFile: File | null = $state(null);
   let receiptPreview: string | null = $state(null);
@@ -33,10 +32,29 @@
     return `Rp ${v.toLocaleString('id-ID')}`;
   }
 
-  function handleCodeInput(e: Event) {
+  function handlePhoneInput(e: Event) {
     const input = e.target as HTMLInputElement;
-    discCode = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
-    input.value = discCode;
+    let value = input.value;
+    
+    // Remove any non-digit and non-plus characters
+    value = value.replace(/[^0-9+]/g, '');
+    
+    // Ensure it starts with +62
+    if (!value.startsWith('+62')) {
+      if (value.startsWith('62')) {
+        value = '+' + value;
+      } else if (value.startsWith('0')) {
+        value = '+62' + value.substring(1);
+      } else if (value.length > 0) {
+        value = '+62' + value;
+      }
+    }
+    
+    // Limit to 15 characters (+62 + 12 digits max)
+    value = value.slice(0, 15);
+    
+    phone = value;
+    input.value = value;
   }
 
   function handleReceiptSelect(e: Event) {
@@ -70,10 +88,13 @@
 
   function validate(): boolean {
     if (slots.length === 0)              { formError = 'Please add at least one charm to your bracelet.'; return false; }
-    if (!name.trim())                    { formError = 'Please enter your full name.'; return false; }
-    if (!phone.trim())                   { formError = 'Please enter your phone number.'; return false; }
+    const trimmedName = name.trim();
+    if (!trimmedName)                    { formError = 'Please enter your full name.'; return false; }
+    if (trimmedName.length > 100)        { formError = 'Name must be 100 characters or less.'; return false; }
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone)                   { formError = 'Please enter your phone number.'; return false; }
+    if (!/^\+62\d{8,12}$/.test(trimmedPhone)) { formError = 'Phone must start with +62 and contain 8-12 digits.'; return false; }
     if (isQris && !receiptFile)          { formError = 'Please upload your payment receipt for QRIS.'; return false; }
-    if (discCode && discCode.length !== 5){ formError = 'Discount code must be exactly 5 characters.'; return false; }
     formError = '';
     return true;
   }
@@ -91,9 +112,8 @@
     if (!validate()) return;
     try {
       const res = await addCheckoutMutation.mutateAsync({
-        name:            name.trim(),
-        phone:           phone.trim(),
-        disc_code:       discCode || undefined,
+        name:            name,
+        phone:           phone,
         payment_method:  paymentMethod,
         receipt:         isQris ? receiptFile : null,
         product_checkout: buildProductCheckout(),
@@ -138,7 +158,6 @@
         <span class="text-xs text-gray-600 font-medium">Subtotal <span class="text-gray-500">({slots.length} charm{slots.length !== 1 ? 's' : ''})</span></span>
         <span class="text-sm font-bold text-black">{formatPrice(subtotal)}</span>
       </div>
-      <p class="text-[10px] text-gray-600 mt-1 leading-relaxed">Final price may vary after discount is applied.</p>
     {:else}
       <div class="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 border border-black/10">
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 shrink-0">
@@ -159,14 +178,17 @@
       <label for="c-name" class="block text-xs font-semibold text-gray-700 mb-1.5 tracking-wide">
         Full Name <span class="text-red-500">*</span>
       </label>
-      <input
-        id="c-name"
-        type="text"
-        bind:value={name}
-        placeholder="e.g. Anya Maharani"
-        autocomplete="name"
-        class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/30 focus:border-black focus:bg-white transition-all duration-150 placeholder:text-gray-400 text-black"
-      />
+      <div class="flex items-center gap-2">
+        <input
+          id="c-name"
+          type="text"
+          bind:value={name}
+          maxlength="100"
+          placeholder="e.g. Anya Maharani"
+          autocomplete="name"
+          class="flex-1 px-3.5 py-2.5 text-sm bg-gray-50 border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/30 focus:border-black focus:bg-white transition-all duration-150 placeholder:text-gray-400 text-black"
+        />
+      </div>
     </div>
 
     <!-- Phone -->
@@ -177,34 +199,13 @@
       <input
         id="c-phone"
         type="tel"
-        bind:value={phone}
-        placeholder="e.g. 08123456789"
+        value={phone}
+        oninput={handlePhoneInput}
+        placeholder="e.g. +628123456789"
         autocomplete="tel"
-        class="w-full px-3.5 py-2.5 text-sm bg-gray-50 border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/30 focus:border-black focus:bg-white transition-all duration-150 placeholder:text-gray-400 text-black"
+        class="w-full px-3.5 py-2.5 text-sm font-mono bg-gray-50 border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/30 focus:border-black focus:bg-white transition-all duration-150 placeholder:text-gray-400 placeholder:font-sans text-black"
       />
-    </div>
-
-    <!-- Discount code -->
-    <div>
-      <label for="c-disc" class="block text-xs font-semibold text-gray-700 mb-1.5 tracking-wide">
-        Discount Code
-        <span class="text-gray-500 font-normal ml-1 normal-case">(optional)</span>
-      </label>
-      <div class="relative">
-        <input
-          id="c-disc"
-          type="text"
-          value={discCode}
-          oninput={handleCodeInput}
-          maxlength="5"
-          placeholder="e.g. SAVE5"
-          spellcheck="false"
-          class="w-full pl-3.5 pr-11 py-2.5 text-sm font-mono tracking-[0.2em] uppercase bg-gray-50 border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/30 focus:border-black focus:bg-white transition-all duration-150 placeholder:text-gray-400 placeholder:normal-case placeholder:tracking-normal placeholder:font-sans text-black"
-        />
-        <span class="absolute inset-y-0 right-3.5 flex items-center text-[11px] text-gray-500 font-mono select-none pointer-events-none">
-          {discCode.length}/5
-        </span>
-      </div>
+      <p class="text-[10px] text-gray-500 mt-1">Must start with +62 and contain 8-12 digits (11-15 characters total)</p>
     </div>
 
     <!-- Divider -->
