@@ -6,11 +6,13 @@
     onRemove,
     onMoveLeft,
     onMoveRight,
+    isReadOnly = false,
   }: {
     slots: BraceletSlot[];
-    onRemove: (instanceId: string) => void;
+    onRemove?: (instanceId: string) => void;
     onMoveLeft: (instanceId: string) => void;
     onMoveRight: (instanceId: string) => void;
+    isReadOnly?: boolean;
   } = $props();
 
   let totalPrice = $derived(slots.reduce((sum, s) => sum + s.product.price, 0));
@@ -18,7 +20,11 @@
   let activeId = $state<string | null>(null);
 
   function toggleActive(id: string) {
-    activeId = activeId === id ? null : id;
+    if (!isReadOnly) {
+      activeId = activeId === id ? null : id;
+    } else {
+      activeId = id;
+    }
   }
 
   function formatPrice(price: number) {
@@ -61,7 +67,11 @@
 
     <!-- Hint: different for touch vs pointer -->
     <p class="text-center text-[10px] text-gray-600 pt-3 px-4 tracking-wide uppercase font-medium">
-      <span class="hidden sm:inline">Hover</span><span class="sm:hidden">Tap</span> a charm to reorder or remove
+      {#if isReadOnly}
+        <span class="hidden sm:inline">Hover</span><span class="sm:hidden">Tap</span> a charm to reorder
+      {:else}
+        <span class="hidden sm:inline">Hover</span><span class="sm:hidden">Tap</span> a charm to reorder or remove
+      {/if}
     </p>
 
     <!-- Scrollable chain strip -->
@@ -110,19 +120,21 @@
                 </div>
               </button>
 
-              <!-- Remove button — always visible on mobile (isActive), hover on desktop -->
-              <button
-                type="button"
-                onclick={(e) => { e.stopPropagation(); onRemove(slot.instanceId); }}
-                class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-800 z-10 transition-all duration-150 active:scale-90
-                  {isActive ? 'opacity-100' : 'opacity-0 sm:group-hover/charm:opacity-100'}"
-                aria-label="Remove {slot.product.name}"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
+              <!-- Remove button — hidden in read-only mode -->
+              {#if !isReadOnly}
+                <button
+                  type="button"
+                  onclick={(e) => { e.stopPropagation(); onRemove?.(slot.instanceId); }}
+                  class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black text-white flex items-center justify-center shadow-md hover:bg-gray-800 z-10 transition-all duration-150 active:scale-90
+                    {isActive ? 'opacity-100' : 'opacity-0 sm:group-hover/charm:opacity-100'}"
+                  aria-label="Remove {slot.product.name}"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              {/if}
             </div>
 
             <!-- Move controls — always visible on mobile (isActive), hover on desktop -->

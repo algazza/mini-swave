@@ -10,6 +10,7 @@
 
   // ── Bracelet state ───────────────────────────────────────────────────────────
   let braceletSlots: BraceletSlot[] = $state([]);
+  let finalizedSlots: BraceletSlot[] = $state([]);
   let successOrderId: string | null = $state(null);
 
   // Mobile tab — 'charms' | 'bracelet' | 'checkout'
@@ -40,12 +41,30 @@
     braceletSlots = updated;
   }
 
+  function moveFinalizedLeft(instanceId: string) {
+    const i = finalizedSlots.findIndex(s => s.instanceId === instanceId);
+    if (i <= 0) return;
+    const updated = [...finalizedSlots];
+    [updated[i - 1], updated[i]] = [updated[i], updated[i - 1]];
+    finalizedSlots = updated;
+  }
+
+  function moveFinalizedRight(instanceId: string) {
+    const i = finalizedSlots.findIndex(s => s.instanceId === instanceId);
+    if (i < 0 || i >= finalizedSlots.length - 1) return;
+    const updated = [...finalizedSlots];
+    [updated[i], updated[i + 1]] = [updated[i + 1], updated[i]];
+    finalizedSlots = updated;
+  }
+
   function handleSuccess(orderId: string) {
+    finalizedSlots = [...braceletSlots];
     successOrderId = orderId;
   }
 
   function resetOrder() {
     braceletSlots = [];
+    finalizedSlots = [];
     successOrderId = null;
     mobileTab = 'charms';
   }
@@ -93,8 +112,8 @@
 
   <!-- ════════════════════════════════════════════════ SUCCESS SCREEN ══════ -->
   {#if successOrderId !== null}
-    <div class="flex items-center justify-center min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-64px)] p-4 sm:p-5">
-      <div class="text-center max-w-sm w-full">
+    <div class="flex flex-col items-center justify-start min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-64px)] p-4 sm:p-5 pt-8 sm:pt-12">
+      <div class="text-center max-w-sm w-full mb-6 sm:mb-8">
 
         <!-- Success icon -->
         <div class="relative mx-auto mb-4 sm:mb-6 w-fit">
@@ -117,6 +136,18 @@
           <p class="font-mono text-sm sm:text-base font-bold text-black break-all">{successOrderId}</p>
           <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1.5">Save this for your records</p>
         </div>
+
+              <!-- Finalized bracelet preview for cashier -->
+      {#if finalizedSlots.length > 0}
+        <div class="w-full max-w-2xl mb-4 sm:mb-5">
+          <BraceletPreview
+            slots={finalizedSlots}
+            isReadOnly={true}
+            onMoveLeft={moveFinalizedLeft}
+            onMoveRight={moveFinalizedRight}
+          />
+        </div>
+      {/if}
 
         <!-- Next steps -->
         <div class="bg-gray-50 border border-black/10 rounded-xl px-4 sm:px-5 py-3 sm:py-4 mb-5 sm:mb-6 text-left space-y-2 sm:space-y-2.5">
@@ -141,6 +172,8 @@
           Design Another Bracelet
         </button>
       </div>
+
+
     </div>
 
   <!-- ════════════════════════════════════════════════════ MAIN LAYOUT ══════ -->
