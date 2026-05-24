@@ -83,14 +83,8 @@
 
       <!-- Brand -->
       <a href="/" class="flex items-center gap-2.5 group" aria-label="Swave home">
-        <div class="w-8 h-8 rounded-lg bg-black flex items-center justify-center transition-transform duration-200 group-hover:scale-105 active:scale-95 shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-          </svg>
-        </div>
+        <img src="/public/logo-swave.png" alt="Swave Logo" class="w-16 md:w-28">
         <div class="leading-tight">
-          <span class="font-bold text-black text-sm sm:text-base tracking-tight">Swave</span>
           <span class="hidden sm:inline text-gray-500 text-xs ml-2 font-light tracking-wide">Italian Charm Bracelets</span>
         </div>
       </a>
@@ -100,7 +94,7 @@
         <button
           type="button"
           onclick={() => mobileTab = 'bracelet'}
-          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-full bg-black text-white text-xs font-semibold transition-all active:scale-95 hover:bg-gray-800 min-h-[44px] sm:min-h-auto"
+          class="inline-flex items-center gap-1.5 px-3 sm:px-3 py-1 sm:py-1.5 rounded-full bg-black text-white text-xs font-semibold transition-all active:scale-95 hover:bg-gray-800"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-white shrink-0"></span>
           <span class="hidden xs:inline">{braceletSlots.length} charm{braceletSlots.length !== 1 ? 's' : ''}</span>
@@ -394,13 +388,7 @@
     <footer class="border-t border-black/10 mt-6 sm:mt-8 py-4 sm:py-6 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-2">
         <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded-md bg-black flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-          </div>
-          <span class="text-xs font-semibold text-black">Swave</span>
+          <img src="/public/logo-swave.png" alt="Swave Logo" class="w-16 md:w-28">
         </div>
         <p class="text-xs text-gray-600 text-center sm:text-right">© {new Date().getFullYear()} Swave — Handcrafted Italian Charm Bracelets</p>
       </div>

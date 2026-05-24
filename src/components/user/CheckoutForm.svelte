@@ -20,6 +20,7 @@
   let receiptPreview: string | null = $state(null);
   let isDragging  = $state(false);
   let formError   = $state('');
+  let showQrModal = $state(false);
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   let subtotal  = $derived(slots.reduce((sum, s) => sum + s.product.price, 0));
@@ -122,6 +123,15 @@
     } catch (err) {
       formError = (err as Error).message || 'Failed to place order. Please try again.';
     }
+  }
+
+  function downloadQR() {
+    const link = document.createElement('a');
+    link.href = '/IMG_8770.png';
+    link.download = 'qris-payment-code.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 </script>
 
@@ -274,9 +284,9 @@
 
         <!-- QR image — full-width on mobile, fixed on larger screens -->
         <div class="flex justify-center px-4 py-4">
-          <div class="p-2 bg-white rounded-lg border border-black/20 shadow-sm w-full max-w-[220px]">
+          <div class="p-2 bg-white rounded-lg border border-black/20 shadow-sm w-full max-w-[220px] cursor-pointer hover:shadow-md transition-shadow duration-200" onclick={() => showQrModal = true}>
             <img
-              src="/QRIS-AL.jpeg"
+              src="/IMG_8770.png"
               alt="QRIS Payment Code"
               class="w-full aspect-square object-contain rounded-md"
             />
@@ -385,3 +395,63 @@
 
   </form>
 </div>
+
+<!-- ═══════════════════════════════════════════════════ QR MODAL ════════ -->
+{#if showQrModal}
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onclick={() => showQrModal = false}>
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full" onclick={(e) => e.stopPropagation()}>
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-black/10">
+        <h3 class="text-sm font-bold text-black">QRIS Payment Code</h3>
+        <button
+          type="button"
+          onclick={() => showQrModal = false}
+          class="text-gray-500 hover:text-gray-700 transition-colors"
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="p-5 flex flex-col items-center gap-4">
+        <div class="p-4 bg-gray-50 rounded-lg border border-black/10">
+          <img
+            src="/IMG_8770.png"
+            alt="QRIS Payment Code"
+            class="w-full aspect-square object-contain rounded-md"
+          />
+        </div>
+        <p class="text-xs text-gray-600 text-center leading-relaxed">
+          Scan this code with any mobile banking or e-wallet app to complete payment.
+        </p>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="px-5 py-4 border-t border-black/10 flex gap-2">
+        <button
+          type="button"
+          onclick={() => showQrModal = false}
+          class="flex-1 px-4 py-2.5 rounded-lg border border-black/10 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          onclick={downloadQR}
+          class="flex-1 px-4 py-2.5 rounded-lg bg-black text-white text-sm font-semibold hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
