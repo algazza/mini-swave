@@ -83,7 +83,7 @@
 
       <!-- Brand -->
       <a href="/" class="flex items-center gap-2.5 group" aria-label="Swave home">
-        <img src="/public/logo-swave.png" alt="Swave Logo" class="w-16 md:w-28">
+        <img src="/logo-swave.png" alt="Swave Logo" class="w-16 md:w-28">
         <div class="leading-tight">
           <span class="hidden sm:inline text-gray-500 text-xs ml-2 font-light tracking-wide">Italian Charm Bracelets</span>
         </div>
@@ -388,7 +388,7 @@
     <footer class="border-t border-black/10 mt-6 sm:mt-8 py-4 sm:py-6 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-2">
         <div class="flex items-center gap-2">
-          <img src="/public/logo-swave.png" alt="Swave Logo" class="w-16 md:w-28">
+          <img src="/logo-swave.png" alt="Swave Logo" class="w-16 md:w-28">
         </div>
         <p class="text-xs text-gray-600 text-center sm:text-right">© {new Date().getFullYear()} Swave — Handcrafted Italian Charm Bracelets</p>
       </div>
