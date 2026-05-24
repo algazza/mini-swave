@@ -5,7 +5,7 @@ import { api } from "../../service/api";
 import type { GetAllCheckoutType } from "../../types/checkout";
 
 export const useCheckout = () => {
-  return createQuery<GetAllCheckoutType[], Error>(() => ({
+  const query = createQuery<GetAllCheckoutType[], Error>(() => ({
     queryKey: ["checkouts"],
     queryFn: async () => {
       try {
@@ -20,4 +20,12 @@ export const useCheckout = () => {
       }
     },
   }));
+
+  return {
+    get isLoading() { return query.isLoading; },
+    get isError() { return query.isError; },
+    get error() { return query.error; },
+    get data() { return query.data; },
+    refetch: () => query.refetch(),
+  };
 };

@@ -5,7 +5,7 @@ import { api } from "../../service/api";
 import type { ProductType } from "../../types/product";
 
 export const useProduct = () => {
-  return createQuery<ProductType[], Error>(() => ({
+  const query = createQuery<ProductType[], Error>(() => ({
     queryKey: ["products"],
     queryFn: async () => {
       try {
@@ -19,4 +19,12 @@ export const useProduct = () => {
       }
     },
   }));
+
+  return {
+    get isLoading() { return query.isLoading; },
+    get isError() { return query.isError; },
+    get error() { return query.error; },
+    get data() { return query.data; },
+    refetch: () => query.refetch(),
+  };
 };

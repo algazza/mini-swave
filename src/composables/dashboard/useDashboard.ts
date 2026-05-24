@@ -11,7 +11,7 @@ import type {
 } from "../../types/dashboard";
 
 export const useDashboard = () => {
-  return createQuery<DashboardDataType, Error>(() => ({
+  const query = createQuery<DashboardDataType, Error>(() => ({
     queryKey: ["dashboard"],
 
     queryFn: async () => {
@@ -28,4 +28,12 @@ export const useDashboard = () => {
       }
     },
   }));
+
+  return {
+    get isLoading() { return query.isLoading; },
+    get isError() { return query.isError; },
+    get error() { return query.error; },
+    get data() { return query.data; },
+    refetch: () => query.refetch(),
+  };
 };
