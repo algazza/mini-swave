@@ -16,6 +16,10 @@
     push('/admin/login');
   }
 
+  // Dashboard
+  import { useDashboard } from '../composables/dashboard/useDashboard';
+  import Dashboard from '../components/admin/Dashboard.svelte';
+
   // Products
   import { useProduct } from '../composables/product/useProduct';
   import ProductList from '../components/admin/ProductList.svelte';
@@ -31,11 +35,16 @@
   import Button from '../components/ui/Button.svelte';
 
   // ─── Sidebar state ─────────────────────────────────────────────────────────
-  type Section = 'products' | 'checkouts';
-  let activeSection: Section = $state('products');
+  type Section = 'dashboard' | 'products' | 'checkouts';
+  let activeSection: Section = $state('dashboard');
   let sidebarOpen = $state(true);
 
   const navItems: { id: Section; label: string; icon: string }[] = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: `<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>`,
+    },
     {
       id: 'products',
       label: 'Products',
@@ -47,6 +56,9 @@
       icon: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>`,
     },
   ];
+
+  // ─── Dashboard ──────────────────────────────────────────────────────────────
+  const dashboardQuery = useDashboard();
 
   // ─── Products ───────────────────────────────────────────────────────────────
   const productQuery = useProduct();
@@ -68,6 +80,11 @@
 
   // ─── Section meta ──────────────────────────────────────────────────────────
   const sectionMeta: Record<Section, { title: string; description: string }> = {
+    dashboard: {
+      title: 'Dashboard',
+      description: 'Overview of revenue, orders, and top-performing products.',
+    },
+
     products: {
       title: 'Products',
       description: 'Manage your product catalog, stock levels, and pricing.',
@@ -198,7 +215,18 @@
       </div>
 
       <!-- Action button per section -->
-      {#if activeSection === 'products'}
+      {#if activeSection === 'dashboard'}
+        <button
+          onclick={() => dashboardQuery.refetch()}
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium hover:bg-slate-200 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          Refresh
+        </button>
+      {:else if activeSection === 'products'}
         <Button onclick={openAddProduct} id="add-product-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -223,8 +251,12 @@
     <!-- Page body -->
     <main class="flex-1 p-6 overflow-auto">
 
+      <!-- ── DASHBOARD section ── -->
+      {#if activeSection === 'dashboard'}
+        <Dashboard />
+
       <!-- ── PRODUCTS section ── -->
-      {#if activeSection === 'products'}
+      {:else if activeSection === 'products'}
         {#if productQuery.isLoading}
           <div class="flex flex-col justify-center items-center py-24">
             <svg class="animate-spin h-8 w-8 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
