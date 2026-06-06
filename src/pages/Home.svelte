@@ -12,10 +12,18 @@
   let braceletSlots: BraceletSlot[] = $state([]);
   let finalizedSlots: BraceletSlot[] = $state([]);
   let successOrderId: string | null = $state(null);
+  let searchQuery: string = $state('');
 
   // Mobile tab — 'charms' | 'bracelet' | 'checkout'
   type MobileTab = 'charms' | 'bracelet' | 'checkout';
   let mobileTab = $state<MobileTab>('charms');
+
+  // Filter products based on search query
+  const filteredProducts = $derived(
+    productQuery.data?.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) ?? []
+  );
 
   function addCharm(product: ProductType) {
     braceletSlots = [...braceletSlots, { instanceId: crypto.randomUUID(), product }];
@@ -66,6 +74,7 @@
     braceletSlots = [];
     finalizedSlots = [];
     successOrderId = null;
+    searchQuery = '';
     mobileTab = 'charms';
   }
 </script>
@@ -260,9 +269,19 @@
                   Choose Your Charms
                 </h2>
                 {#if productQuery.data}
-                  <p class="text-[10px] sm:text-xs text-gray-500 mt-1">{productQuery.data.length} styles available</p>
+                  <p class="text-[10px] sm:text-xs text-gray-500 mt-1">{filteredProducts.length} of {productQuery.data.length} styles</p>
                 {/if}
               </div>
+            </div>
+
+            <!-- Search input -->
+            <div class="mb-4 sm:mb-5">
+              <input
+                type="text"
+                placeholder="Search charms by name..."
+                bind:value={searchQuery}
+                class="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-black/20 text-xs sm:text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/20 transition-all"
+              />
             </div>
 
             {#if productQuery.isLoading}
@@ -284,8 +303,13 @@
                 <p class="text-xs text-gray-600 mb-4">{productQuery.error?.message}</p>
                 <button onclick={() => productQuery.refetch()} class="text-xs font-semibold text-black underline">Try again</button>
               </div>
+            {:else if filteredProducts.length === 0 && searchQuery}
+              <div class="bg-gray-50 border border-black/10 rounded-lg p-8 text-center">
+                <p class="text-sm font-semibold text-black mb-1">No charms found</p>
+                <p class="text-xs text-gray-600">Try searching with different keywords</p>
+              </div>
             {:else if productQuery.data}
-              <CharmPicker products={productQuery.data} slots={braceletSlots} onAdd={addCharm} />
+              <CharmPicker products={filteredProducts} slots={braceletSlots} onAdd={addCharm} />
 
               <!-- Mobile CTA after picking at least one charm -->
               {#if braceletSlots.length > 0}
