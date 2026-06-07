@@ -140,6 +140,7 @@
           <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1.5">Save this for your records</p>
         </div>
 
+              <!-- Finalized bracelet preview for cashier -->
       {#if finalizedSlots.length > 0}
         <div class="w-full max-w-2xl mb-4 sm:mb-5">
           <BraceletPreview
